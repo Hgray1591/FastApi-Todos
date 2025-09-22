@@ -252,9 +252,12 @@
       }
 
       async function deleteTodo(id) {
-        const response = await fetch(`/todos/${id}`, {
-          method: "DELETE",
-        });
+        if (confirm("정말 삭제하시겠습니까?")) {
+          const response = await fetch(`/todos/${id}`, {
+            method: "DELETE",
+          });
+        }
+
         if (response.ok) {
           fetchTodos();
         }
