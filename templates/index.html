@@ -49,7 +49,7 @@
       .todo-container {
         display: flex;
         width: 600px;
-        height: 400px;
+        height: 550px;
         margin: auto;
         padding: 20px;
         align-items: center;
@@ -58,7 +58,7 @@
       }
       #todo-list {
         width: 100%;
-        height: 250px;
+        height: 400px;
         overflow-y: auto;
         margin-bottom: 20px;
       }
@@ -87,15 +87,28 @@
         todoList.innerHTML = "";
         todos.forEach((todo) => {
           const li = document.createElement("li");
-          li.textContent = `${todo.title}: ${todo.description} (Completed: ${todo.completed})`;
+          li.className = "todo-item";
+          const contentDiv = document.createElement("div");
+          contentDiv.className = "todo-content";
+          contentDiv.textContent = `${todo.title}: ${todo.description} (Completed: ${todo.completed})`;
+
+          const actionsDiv = document.createElement("div");
+          actionsDiv.className = "todo-actions";
+
           const editButton = document.createElement("button");
           editButton.textContent = "Edit";
           editButton.onclick = () => editTodo(todo.id);
+
           const deleteButton = document.createElement("button");
           deleteButton.textContent = "Delete";
           deleteButton.onclick = () => deleteTodo(todo.id);
-          li.appendChild(editButton);
-          li.appendChild(deleteButton);
+
+          actionsDiv.appendChild(editButton);
+          actionsDiv.appendChild(deleteButton);
+
+          li.appendChild(contentDiv);
+          li.appendChild(actionsDiv);
+
           todoList.appendChild(li);
         });
       }
