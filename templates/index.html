@@ -252,12 +252,13 @@
       }
 
       async function deleteTodo(id) {
-        if (confirm("정말 삭제하시겠습니까?")) {
-          const response = await fetch(`/todos/${id}`, {
-            method: "DELETE",
-          });
+        var confirmflag = confirm("Are you sure to delete this?");
+        if (!confirmflag) {
+          return;
         }
-
+        const response = await fetch(`/todos/${id}`, {
+          method: "DELETE",
+        });
         if (response.ok) {
           fetchTodos();
         }
