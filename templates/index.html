@@ -280,6 +280,8 @@
           });
           if (response.ok) {
             fetchTodos();
+            document.getElementById("title").value = "";
+            document.getElementById("description").value = "";
           }
         });
 
