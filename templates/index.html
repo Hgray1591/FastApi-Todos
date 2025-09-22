@@ -134,10 +134,23 @@
         overflow-y: auto;
         margin-bottom: 20px;
       }
+      #todo-list::-webkit-scrollbar {
+        width: 8px;
+        background-color: rgba(57, 69, 179, 0.1);
+        border-radius: 10px;
+      }
+      #todo-list::-webkit-scrollbar-thumb {
+        background-color: rgba(57, 69, 179, 0.2);
+        border-radius: 10px;
+      }
+      #todo-list::-webkit-scrollbar-button {
+        display: none;
+      }
       .todo-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        margin-right: 8px;
       }
       .todo-checkbox {
         width: 16px;
@@ -194,6 +207,11 @@
           contentDiv.className = "todo-content";
           contentDiv.textContent = `${todo.title}: ${todo.description}`;
 
+          if (todo.completed) {
+            contentDiv.style.textDecoration = "line-through";
+            contentDiv.style.color = "#aaa";
+          }
+
           const actionsDiv = document.createElement("div");
           actionsDiv.className = "todo-actions";
 
@@ -219,13 +237,14 @@
       async function editTodo(id) {
         const title = prompt("Enter new title:");
         const description = prompt("Enter new description:");
-        const completed = confirm("Is this task completed?");
+        // const completed = confirm("Is this task completed?");
         const response = await fetch(`/todos/${id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id, title, description, completed }),
+          //   body: JSON.stringify({ id, title, description, completed }),
+          body: JSON.stringify({ id, title, description }),
         });
         if (response.ok) {
           fetchTodos();
