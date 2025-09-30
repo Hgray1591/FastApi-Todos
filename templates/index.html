@@ -184,6 +184,7 @@
       </form>
     </div>
     <script>
+      const todoListContainer = document.getElementById("todo-list");
       async function fetchTodos() {
         const response = await fetch("/todos");
         const todos = await response.json();
@@ -197,6 +198,16 @@
           li.className = "todo-item";
           li.id = `todo-${todo.id}`;
 
+          li.draggable = true;
+
+          li.addEventListener("dragstart", () => {
+            setTimeout(() => li.classList.add("dragging"), 0);
+          });
+
+          li.addEventListener("dragend", () => {
+            li.classList.remove("dragging");
+          });
+
           const checkbox = document.createElement("input");
           checkbox.className = "todo-checkbox";
           checkbox.type = "checkbox";
@@ -206,7 +217,7 @@
             await fetch(`/todos/${todo.id}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...todo, completed: !todo.completed }),
+              body: JSON.stringify({ completed: !todo.completed }),
             });
             fetchTodos();
           });
@@ -297,6 +308,38 @@
             document.getElementById("description").value = "";
           }
         });
+
+      todoListContainer.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const draggingItem = document.querySelector(".dragging");
+        if (!draggingItem) return;
+        const siblings = [
+          ...todoListContainer.querySelectorAll(".todo-item:not(.dragging)"),
+        ];
+        let nextSibling = siblings.find((sibling) => {
+          const rect = sibling.getBoundingClientRect();
+          return e.clientY <= rect.top + rect.height / 2;
+        });
+        if (nextSibling) {
+          todoListContainer.insertBefore(draggingItem, nextSibling);
+        } else {
+          todoListContainer.appendChild(draggingItem);
+        }
+      });
+
+      todoListContainer.addEventListener("dragend", async () => {
+        const updatedItems = [
+          ...todoListContainer.querySelectorAll(".todo-item"),
+        ];
+        const idsInNewOrder = updatedItems.map((item) =>
+          parseInt(item.id.split("-")[1])
+        );
+        await fetch("/todos/reorder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: idsInNewOrder }),
+        });
+      });
 
       fetchTodos();
     </script>
