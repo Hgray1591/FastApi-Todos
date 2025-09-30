@@ -152,6 +152,10 @@
         justify-content: space-between;
         margin-right: 8px;
       }
+      .todo-item.dragging {
+        opacity: 0.5;
+        background: #f0f2f5;
+      }
       .todo-checkbox {
         width: 16px;
         height: 16px;
@@ -191,6 +195,7 @@
         todos.forEach((todo) => {
           const li = document.createElement("li");
           li.className = "todo-item";
+          li.id = `todo-${todo.id}`;
 
           const checkbox = document.createElement("input");
           checkbox.className = "todo-checkbox";
