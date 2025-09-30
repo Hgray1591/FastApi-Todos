@@ -268,7 +268,8 @@
           method: "DELETE",
         });
         if (response.ok) {
-          fetchTodos();
+          // fetchTodos();
+          document.getElementById(`todo-${id}`).remove();
         }
       }
 
