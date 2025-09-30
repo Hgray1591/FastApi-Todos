@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>To-Do List</title>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
       @font-face {
         font-family: "Escoredream";
@@ -146,16 +147,26 @@
       #todo-list::-webkit-scrollbar-button {
         display: none;
       }
+
       .todo-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-right: 8px;
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        position: relative;
+        z-index: 1;
       }
-      .todo-item.dragging {
-        opacity: 0.5;
-        background: #f0f2f5;
+
+      .sortable-ghost {
+        opacity: 0.4;
+        background: #cce5ff;
       }
+
+      .sortable-chosen {
+        opacity: 0.8;
+      }
+
       .todo-checkbox {
         width: 16px;
         height: 16px;
@@ -197,16 +208,6 @@
           const li = document.createElement("li");
           li.className = "todo-item";
           li.id = `todo-${todo.id}`;
-
-          li.draggable = true;
-
-          li.addEventListener("dragstart", () => {
-            setTimeout(() => li.classList.add("dragging"), 0);
-          });
-
-          li.addEventListener("dragend", () => {
-            li.classList.remove("dragging");
-          });
 
           const checkbox = document.createElement("input");
           checkbox.className = "todo-checkbox";
@@ -309,36 +310,28 @@
           }
         });
 
-      todoListContainer.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        const draggingItem = document.querySelector(".dragging");
-        if (!draggingItem) return;
-        const siblings = [
-          ...todoListContainer.querySelectorAll(".todo-item:not(.dragging)"),
-        ];
-        let nextSibling = siblings.find((sibling) => {
-          const rect = sibling.getBoundingClientRect();
-          return e.clientY <= rect.top + rect.height / 2;
-        });
-        if (nextSibling) {
-          todoListContainer.insertBefore(draggingItem, nextSibling);
-        } else {
-          todoListContainer.appendChild(draggingItem);
-        }
-      });
+      // 드래그 구현
+      const todoListEl = document.getElementById("todo-list");
+      new Sortable(todoListEl, {
+        animation: 200,
+        ghostClass: "sortable-ghost",
+        chosenClass: "sortable-chosen",
 
-      todoListContainer.addEventListener("dragend", async () => {
-        const updatedItems = [
-          ...todoListContainer.querySelectorAll(".todo-item"),
-        ];
-        const idsInNewOrder = updatedItems.map((item) =>
-          parseInt(item.id.split("-")[1])
-        );
-        await fetch("/todos/reorder", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids: idsInNewOrder }),
-        });
+        // 드래그가 끝났을 때 호출되는 함수
+        onEnd: async function () {
+          // 자식 요소들의 현재 순서를 가져옴
+          const updatedItems = [...todoListEl.children];
+          const idsInNewOrder = updatedItems.map((item) =>
+            parseInt(item.id.split("-")[1])
+          );
+
+          // 서버에 변경된 순서를 저장합니다.
+          await fetch("/todos/reorder", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids: idsInNewOrder }),
+          });
+        },
       });
 
       fetchTodos();
