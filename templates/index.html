@@ -183,6 +183,9 @@
       async function fetchTodos() {
         const response = await fetch("/todos");
         const todos = await response.json();
+
+        todos.sort((a, b) => a.completed - b.completed);
+
         const todoList = document.getElementById("todo-list");
         todoList.innerHTML = "";
         todos.forEach((todo) => {
