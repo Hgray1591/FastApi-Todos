@@ -3,7 +3,7 @@
 import requests
 
 # 실제 배포된 서버의 주소를 입력합니다.
-DEPLOYED_URL = "43.202.229.52:8989"
+DEPLOYED_URL = "http://43.202.229.52:8989/"
 
 def test_health_check():
     """배포된 서버가 정상적으로 응답하는지 확인 (헬스 체크)"""
