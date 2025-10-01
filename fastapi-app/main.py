@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
@@ -8,7 +9,8 @@ import json
 import os
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="templates"), name="static")
+BASE_DIR = Path(__file__).resolve().parent
+app.mount("/static", StaticFiles(directory=BASE_DIR / "templates"), name="static")
 
 # 날짜/시간 변환 함수
 def json_datetime_serializer(obj):
