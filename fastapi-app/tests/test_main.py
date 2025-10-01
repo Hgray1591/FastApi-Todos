@@ -94,7 +94,7 @@ def test_delete_todo():
     response = client.delete("/todos/1")
     assert response.status_code == 200
     # [수정됨] API 응답 메시지에 맞춰 수정
-    assert response.json()["message"] == "To-Do item deleted successfully"
+    assert response.json()["message"] == "To-Do item deleted"
 
     # 3. 삭제 후 목록이 비었는지 확인
     response = client.get("/todos")
