@@ -1,11 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
 import json
 import os
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="templates"), name="static")
+
 
 # To-Do 항목 모델
 class TodoItem(BaseModel):
@@ -48,7 +51,7 @@ def get_todos():
 @app.post("/todos", response_model=TodoItem)
 def create_todo(todo: TodoItem):
     todos = load_todos()
-    todos.append(todo.dict())
+    todos.append(todo.model_dump())
     save_todos(todos)
     return todo
 
@@ -96,8 +99,9 @@ def reorder_todos(request: ReorderRequest):
 # HTML 파일 서빙
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    html_file_path = "templates/index.html" # 간소화
+    html_file_path = "templates/index.html"
     if not os.path.exists(html_file_path):
-        raise HTTPException(status_code=404, detail="index.html not found")
+        raise HTTPException(status_code=404, detail="templates/index.html not found")
+    
     with open(html_file_path, "r", encoding="utf-8") as file:
         return HTMLResponse(content=file.read())
