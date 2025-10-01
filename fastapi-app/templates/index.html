@@ -5,178 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>To-Do List</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <style>
-      @font-face {
-        font-family: "Escoredream";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-1Thin.woff")
-          format("woff");
-        font-weight: 100;
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "Escoredream";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-2ExtraLight.woff")
-          format("woff");
-        font-weight: 200;
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "Escoredream";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-3Light.woff")
-          format("woff");
-        font-weight: 300;
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "Escoredream";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-4Regular.woff")
-          format("woff");
-        font-weight: normal;
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "Escoredream";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-5Medium.woff")
-          format("woff");
-        font-weight: 500;
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "Escoredream";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-6Bold.woff")
-          format("woff");
-        font-weight: 600;
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "Escoredream";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-7ExtraBold.woff")
-          format("woff");
-        font-weight: 700;
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "Escoredream";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-8Heavy.woff")
-          format("woff");
-        font-weight: 800;
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "Escoredream";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-9Black.woff")
-          format("woff");
-        font-weight: 900;
-        font-display: swap;
-      }
-      body {
-        font-family: "Escoredream", sans-serif;
-        background-color: #f0f2f5;
-        margin: 2em;
-      }
-      h1 {
-        color: #333;
-      }
-      ul {
-        list-style-type: none;
-        padding: 0;
-      }
-      li {
-        background-color: white;
-        margin-bottom: 10px;
-        padding: 15px;
-        border-radius: 5px;
-        font-weight: 300;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      form {
-        margin-top: 20px;
-      }
-      input[type="text"] {
-        padding: 10px;
-        margin-right: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-      }
-      button {
-        padding: 10px;
-        border: none;
-        background-color: #007bff;
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      .todo-container {
-        display: flex;
-        width: 600px;
-        height: 550px;
-        margin: auto;
-        padding: 20px;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-      }
-      #todo-list {
-        width: 100%;
-        height: 400px;
-        overflow-y: auto;
-        margin-bottom: 20px;
-      }
-      #todo-list::-webkit-scrollbar {
-        width: 8px;
-        background-color: rgba(57, 69, 179, 0.1);
-        border-radius: 10px;
-      }
-      #todo-list::-webkit-scrollbar-thumb {
-        background-color: rgba(57, 69, 179, 0.2);
-        border-radius: 10px;
-      }
-      #todo-list::-webkit-scrollbar-button {
-        display: none;
-      }
-
-      .todo-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-right: 8px;
-        position: relative;
-        z-index: 1;
-      }
-
-      .sortable-ghost {
-        opacity: 0.4;
-        background: #cce5ff40;
-      }
-
-      .sortable-chosen {
-        opacity: 0.8;
-      }
-
-      .todo-checkbox {
-        width: 16px;
-        height: 16px;
-      }
-      .todo-content {
-        width: 400px;
-      }
-      .todo-actions button {
-        margin-left: 10px;
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="static/style.css" />
   </head>
   <body>
     <div class="todo-container">
@@ -236,11 +65,11 @@
 
           const editButton = document.createElement("button");
           editButton.textContent = "Edit";
-          editButton.onclick = () => editTodo(todo.id);
+          editButton.onclick = () => editTodo(todo);
 
           const deleteButton = document.createElement("button");
           deleteButton.textContent = "Delete";
-          deleteButton.onclick = () => deleteTodo(todo.id);
+          deleteButton.onclick = () => deleteTodo(todo);
 
           actionsDiv.appendChild(editButton);
           actionsDiv.appendChild(deleteButton);
@@ -253,34 +82,34 @@
         });
       }
 
-      async function editTodo(id) {
-        const title = prompt("Enter new title:");
-        const description = prompt("Enter new description:");
-        // const completed = confirm("Is this task completed?");
-        const response = await fetch(`/todos/${id}`, {
+      async function editTodo(todo) {
+        const newTitle = prompt("새 제목:", todo.title);
+        if (newTitle === null) return;
+        const newDescription = prompt("새 설명:", todo.description);
+        if (newDescription === null) return;
+
+        await fetch(`/todos/${todo.id}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          //   body: JSON.stringify({ id, title, description, completed }),
-          body: JSON.stringify({ id, title, description }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: newTitle,
+            description: newDescription,
+          }),
         });
-        if (response.ok) {
-          fetchTodos();
-        }
+        fetchTodos();
       }
 
-      async function deleteTodo(id) {
+      async function deleteTodo(todo) {
         var confirmflag = confirm("Are you sure to delete this?");
         if (!confirmflag) {
           return;
         }
-        const response = await fetch(`/todos/${id}`, {
+        const response = await fetch(`/todos/${todo.id}`, {
           method: "DELETE",
         });
         if (response.ok) {
           // fetchTodos();
-          document.getElementById(`todo-${id}`).remove();
+          document.getElementById(`todo-${todo.id}`).remove();
         }
       }
 
