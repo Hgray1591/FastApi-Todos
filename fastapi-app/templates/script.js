@@ -42,7 +42,7 @@ function createTodoElement(todo) {
 
   const contentDiv = document.createElement("div");
   contentDiv.className = "todo-content";
-  contentDiv.textContent = `${todo.title}: ${todo.description}`;
+  contentDiv.innerHTML = `<b>${todo.title}:</b> ${todo.description}`;
   if (todo.completed) {
     contentDiv.style.textDecoration = "line-through";
     contentDiv.style.color = "#aaa";
@@ -224,6 +224,7 @@ function createContextMenu() {
   menu.id = "custom-context-menu";
   menu.className = "custom-context-menu";
 
+  // ------ 일정 추가 ------
   const addItem = document.createElement("div");
   addItem.className = "context-menu-item";
   addItem.textContent = "일정 추가";
@@ -252,7 +253,32 @@ function createContextMenu() {
     hideContextMenu();
   };
 
+  // ------ 일정 삭제 ------
+  const deleteItem = document.createElement("div");
+  deleteItem.id = "delete-schedule-item";
+  deleteItem.className = "context-menu-item";
+  deleteItem.textContent = "일정 삭제";
+  deleteItem.style.color = "red";
+
+  deleteItem.onclick = async () => {
+    if (!currentTodoForMenu || !currentTodoForMenu.schedule) return;
+
+    if (
+      confirm(`'${currentTodoForMenu.title}' 항목의 일정을 삭제하시겠습니까?`)
+    ) {
+      await fetch(`/todos/${currentTodoForMenu.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        // schedule을 null로 설정하여 서버에 전송
+        body: JSON.stringify({ schedule: null }),
+      });
+      fetchTodos(); // 화면 새로고침
+    }
+    hideContextMenu(); // 메뉴 숨기기
+  };
+
   menu.appendChild(addItem);
+  menu.appendChild(deleteItem);
   document.body.appendChild(menu);
 }
 
