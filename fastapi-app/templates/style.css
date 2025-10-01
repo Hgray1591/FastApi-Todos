@@ -141,12 +141,16 @@ button:hover {
 }
 
 .todo-item {
-  display: flex;
+  display: grid;
   align-items: center;
   justify-content: space-between;
   margin-right: 8px;
   position: relative;
   z-index: 1;
+
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0 15px;
 }
 .custom-context-menu {
   position: absolute;
@@ -185,8 +189,60 @@ button:hover {
   height: 16px;
 }
 .todo-content {
-  width: 400px;
+  /* width: 400px; */
 }
 .todo-actions button {
   margin-left: 10px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 20000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 350px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+}
+
+.modal-content input[type="datetime-local"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.modal-actions {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.modal-actions button {
+  padding: 8px 15px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.modal-actions .btn-save {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
 }

@@ -1,4 +1,4 @@
-const todoListContainer = document.getElementById("todo-list"); // To-Do 리스트 컨테이너
+const todoListElement = document.getElementById("todo-list"); // To-Do 리스트 컨테이너
 let currentTodoForMenu = null; // 어떤 아이템이 우클릭되었는지 저장하는 변수
 
 async function fetchTodos() {
@@ -7,61 +7,83 @@ async function fetchTodos() {
 
   todos.sort((a, b) => a.completed - b.completed);
 
-  const todoList = document.getElementById("todo-list");
-  todoList.innerHTML = "";
+  const todoListElement = document.getElementById("todo-list");
+  todoListElement.innerHTML = "";
   todos.forEach((todo) => {
-    const li = document.createElement("li");
-    li.className = "todo-item";
-    li.id = `todo-${todo.id}`;
-
-    // 우클릭 이벤트 리스너 추가
-    li.addEventListener("contextmenu", (event) => {
-      showContextMenu(event, todo);
-    });
-
-    const checkbox = document.createElement("input");
-    checkbox.className = "todo-checkbox";
-    checkbox.type = "checkbox";
-    checkbox.checked = todo.completed;
-
-    checkbox.addEventListener("click", async () => {
-      await fetch(`/todos/${todo.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed: !todo.completed }),
-      });
-      fetchTodos();
-    });
-
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "todo-content";
-    contentDiv.textContent = `${todo.title}: ${todo.description}`;
-
-    if (todo.completed) {
-      contentDiv.style.textDecoration = "line-through";
-      contentDiv.style.color = "#aaa";
-    }
-
-    const actionsDiv = document.createElement("div");
-    actionsDiv.className = "todo-actions";
-
-    const editButton = document.createElement("button");
-    editButton.textContent = "Edit";
-    editButton.onclick = () => editTodo(todo);
-
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.onclick = () => deleteTodo(todo);
-
-    actionsDiv.appendChild(editButton);
-    actionsDiv.appendChild(deleteButton);
-
-    li.appendChild(checkbox);
-    li.appendChild(contentDiv);
-    li.appendChild(actionsDiv);
-
-    todoList.appendChild(li);
+    // 분리된 함수를 호출하여 li 요소를 생성하고 추가
+    const li = createTodoElement(todo);
+    todoListElement.appendChild(li);
   });
+}
+
+function createTodoElement(todo) {
+  const li = document.createElement("li");
+  li.className = "todo-item";
+  li.id = `todo-${todo.id}`;
+  li.addEventListener("contextmenu", (event) => showContextMenu(event, todo));
+
+  // 1. 체크박스 생성
+  const checkbox = document.createElement("input");
+  checkbox.className = "todo-checkbox";
+  checkbox.type = "checkbox";
+  checkbox.checked = todo.completed;
+  checkbox.addEventListener("click", async () => {
+    await fetch(`/todos/${todo.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ completed: !todo.completed }),
+    });
+    fetchTodos();
+  });
+
+  // 2. 내용(제목/설명 + 일정) 부분 생성
+  const contentWrapper = document.createElement("div");
+  contentWrapper.style.flexGrow = "1";
+
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "todo-content";
+  contentDiv.textContent = `${todo.title}: ${todo.description}`;
+  if (todo.completed) {
+    contentDiv.style.textDecoration = "line-through";
+    contentDiv.style.color = "#aaa";
+  }
+  contentWrapper.appendChild(contentDiv);
+
+  if (todo.schedule) {
+    const scheduleDiv = document.createElement("small");
+    scheduleDiv.style.display = "block";
+    scheduleDiv.style.color = "#555";
+    scheduleDiv.style.marginTop = "4px";
+    const scheduleDate = new Date(todo.schedule);
+    scheduleDiv.textContent = `📅 ${scheduleDate.toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })}`;
+    contentWrapper.appendChild(scheduleDiv);
+  }
+
+  // 3. 버튼(수정/삭제) 부분 생성
+  const actionsDiv = document.createElement("div");
+  actionsDiv.className = "todo-actions";
+  const editButton = document.createElement("button");
+  editButton.textContent = "Edit";
+  editButton.onclick = () => editTodo(todo);
+  const deleteButton = document.createElement("button");
+  deleteButton.textContent = "Delete";
+  deleteButton.onclick = () => deleteTodo(todo);
+
+  actionsDiv.appendChild(editButton);
+  actionsDiv.appendChild(deleteButton);
+
+  li.appendChild(checkbox);
+  li.appendChild(contentWrapper);
+  li.appendChild(actionsDiv);
+
+  return li;
 }
 
 async function editTodo(todo) {
@@ -136,7 +158,7 @@ new Sortable(todoListEl, {
       parseInt(item.id.split("-")[1])
     );
 
-    // 서버에 변경된 순서를 저장합니다.
+    // 서버에 변경된 순서를 저장
     await fetch("/todos/reorder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -146,6 +168,55 @@ new Sortable(todoListEl, {
 });
 
 // ---------- 우클릭 시 컨텍스트 메뉴 ----------
+
+function createScheduleModal() {
+  const modalOverlay = document.createElement("div");
+  modalOverlay.id = "schedule-modal";
+  modalOverlay.className = "modal-overlay";
+
+  modalOverlay.innerHTML = `
+            <div class="modal-content">
+                <h3>일정 설정</h3>
+                <p id="modal-todo-title"></p>
+                <input type="datetime-local" id="schedule-input">
+                <div class="modal-actions">
+                    <button id="btn-cancel-schedule">취소</button>
+                    <button id="btn-save-schedule" class="btn-save">저장</button>
+                </div>
+            </div>
+        `;
+  document.body.appendChild(modalOverlay);
+
+  // 모달 창 닫기 (취소 버튼 또는 배경 클릭)
+  const closeModal = () => {
+    modalOverlay.style.display = "none";
+  };
+  modalOverlay.querySelector("#btn-cancel-schedule").onclick = closeModal;
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) {
+      // 배경 클릭 시 닫기
+      closeModal();
+    }
+  });
+
+  // 저장 버튼 클릭 시 동작
+  modalOverlay.querySelector("#btn-save-schedule").onclick = async () => {
+    const todoId = modalOverlay.dataset.todoId;
+    const newSchedule = modalOverlay.querySelector("#schedule-input").value;
+
+    if (todoId && newSchedule) {
+      await fetch(`/todos/${todoId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ schedule: newSchedule }),
+      });
+      fetchTodos(); // 화면 새로고침
+      closeModal();
+    }
+  };
+}
+
+// 여기까지는 모달
 
 // 1. 페이지 로드 시 커스텀 메뉴 요소를 미리 생성
 function createContextMenu() {
@@ -161,41 +232,23 @@ function createContextMenu() {
   addItem.onclick = () => {
     if (!currentTodoForMenu) return;
 
-    // 동적으로 input 요소 생성
-    const dateInput = document.createElement("input");
-    dateInput.type = "datetime-local";
+    const modal = document.getElementById("schedule-modal");
+    const modalTitle = document.getElementById("modal-todo-title");
+    const scheduleInput = document.getElementById("schedule-input");
 
-    // 현재 시간을 기본값으로 설정하는 로직
+    // 모달에 현재 To-Do의 ID와 제목을 전달
+    modal.dataset.todoId = currentTodoForMenu.id;
+    modalTitle.textContent = `'${currentTodoForMenu.title}' 항목의 일정을 설정합니다.`;
+
+    // input의 기본값 설정
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    dateInput.value = now.toISOString().slice(0, 16);
+    const defaultValue = currentTodoForMenu.schedule
+      ? currentTodoForMenu.schedule.slice(0, 16)
+      : now.toISOString().slice(0, 16);
+    scheduleInput.value = defaultValue;
 
-    // 화면에 보이지 않게 숨김
-    dateInput.style.position = "absolute";
-    dateInput.style.left = "-9999px";
-    document.body.appendChild(dateInput);
-
-    // 날짜가 선택되면(change 이벤트) 서버로 데이터 전송
-    dateInput.addEventListener("change", async (e) => {
-      const newSchedule = e.target.value;
-      if (newSchedule) {
-        await fetch(`/todos/${currentTodoForMenu.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ schedule: newSchedule }),
-        });
-        fetchAndRenderTodos(); // 화면 새로고침
-      }
-      document.body.removeChild(dateInput); // input 요소 제거
-    });
-
-    // 사용자가 선택을 취소(cancel 이벤트)하면 input 요소 제거
-    dateInput.addEventListener("cancel", () => {
-      document.body.removeChild(dateInput);
-    });
-
-    // 프로그램적으로 날짜 선택창 띄우기
-    dateInput.showPicker();
+    modal.style.display = "flex"; // 모달 보이기
     hideContextMenu();
   };
 
@@ -235,4 +288,5 @@ window.addEventListener("keydown", (e) => {
 // -------------------------------------
 
 createContextMenu();
+createScheduleModal();
 fetchTodos();

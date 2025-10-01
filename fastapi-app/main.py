@@ -10,6 +10,12 @@ import os
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="templates"), name="static")
 
+# 날짜/시간 변환 함수
+def json_datetime_serializer(obj):
+    """datetime 객체를 ISO 형식 문자열로 변환하는 함수"""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 # To-Do 항목 모델
 class TodoItem(BaseModel):
@@ -43,7 +49,7 @@ def load_todos():
 # JSON 파일에 To-Do 항목 저장
 def save_todos(todos):
     with open(TODO_FILE, "w", encoding="utf-8") as file:
-        json.dump(todos, file, indent=4, ensure_ascii=False)
+        json.dump(todos, file, indent=4, ensure_ascii=False, default=json_datetime_serializer)
 
 # To-Do 목록 조회
 @app.get("/todos", response_model=list[TodoItem])
