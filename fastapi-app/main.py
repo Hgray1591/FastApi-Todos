@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
+from datetime import datetime
 import json
 import os
 
@@ -16,11 +17,13 @@ class TodoItem(BaseModel):
     title: str
     description: str
     completed: bool
+    schedule: Optional[datetime] = None
 
 class UpdateTodoItem(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
+    schedule: Optional[datetime] = None
 
 class ReorderRequest(BaseModel):
     ids: List[int]
@@ -70,7 +73,7 @@ def update_todo(todo_id: int, updated_data: UpdateTodoItem):
     return todo_to_update
 
 # To-Do 항목 삭제
-@app.delete("/todos/{todo_id}", response_model=dict)
+@app.delete("/todos/{todo_id}")
 def delete_todo(todo_id: int):
     todos = load_todos()
     original_length = len(todos)

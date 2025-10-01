@@ -159,11 +159,44 @@ function createContextMenu() {
 
   // 메뉴 아이템 클릭 시 실행될 동작
   addItem.onclick = () => {
-    if (currentTodoForMenu) {
-      // 실제 기능 대신 간단한 알림창으로 대체
-      alert(`'${currentTodoForMenu.title}' 항목에 대한 일정을 추가합니다.`);
-    }
-    hideContextMenu(); // 메뉴 숨기기
+    if (!currentTodoForMenu) return;
+
+    // 동적으로 input 요소 생성
+    const dateInput = document.createElement("input");
+    dateInput.type = "datetime-local";
+
+    // 현재 시간을 기본값으로 설정하는 로직
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    dateInput.value = now.toISOString().slice(0, 16);
+
+    // 화면에 보이지 않게 숨김
+    dateInput.style.position = "absolute";
+    dateInput.style.left = "-9999px";
+    document.body.appendChild(dateInput);
+
+    // 날짜가 선택되면(change 이벤트) 서버로 데이터 전송
+    dateInput.addEventListener("change", async (e) => {
+      const newSchedule = e.target.value;
+      if (newSchedule) {
+        await fetch(`/todos/${currentTodoForMenu.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ schedule: newSchedule }),
+        });
+        fetchAndRenderTodos(); // 화면 새로고침
+      }
+      document.body.removeChild(dateInput); // input 요소 제거
+    });
+
+    // 사용자가 선택을 취소(cancel 이벤트)하면 input 요소 제거
+    dateInput.addEventListener("cancel", () => {
+      document.body.removeChild(dateInput);
+    });
+
+    // 프로그램적으로 날짜 선택창 띄우기
+    dateInput.showPicker();
+    hideContextMenu();
   };
 
   menu.appendChild(addItem);
