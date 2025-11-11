@@ -7,10 +7,15 @@ from typing import List, Optional
 from datetime import datetime
 import json
 import os
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "templates"), name="static")
+
+# Prometheus 메트릭스 엔드포인트 (/metrics)
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
 
 # 날짜/시간 변환 함수
 def json_datetime_serializer(obj):
