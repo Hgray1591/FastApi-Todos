@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -49,6 +49,16 @@ async def log_requests(request: Request, call_next):
     # **Only log if duration exists**
     if duration:
         custom_logger.info(log_message)
+
+    return response
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    duration = (time.time() - start) * 1000
+
+    print(f"{request.client.host} - {request.method} {request.url.path} - {response.status_code} - {duration:.2f}ms")
 
     return response
 
