@@ -13,7 +13,7 @@ from multiprocessing import Queue
 from os import getenv
 from fastapi import Request
 from prometheus_fastapi_instrumentator import Instrumentator
-from logging_loki import LokiQueueHandler
+from logging_loki import LokiQueueHandler, LokiHandler
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
@@ -34,9 +34,17 @@ loki_logs_handler = LokiQueueHandler(
 custom_logger = logging.getLogger("custom.access")
 custom_logger.setLevel(logging.INFO)
 
+loki_handler = LokiHandler(
+    url=os.getenv("LOKI_ENDPOINT"),
+    tags={"application": "fastapi"},
+    version="1",
+)
+custom_logger.addHandler(loki_handler)
+
 # Add Loki handler (assuming `loki_logs_handler` is correctly configured)
 custom_logger.addHandler(loki_logs_handler)
 
+@app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
@@ -52,15 +60,6 @@ async def log_requests(request: Request, call_next):
 
     return response
 
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start = time.time()
-    response = await call_next(request)
-    duration = (time.time() - start) * 1000
-
-    print(f"{request.client.host} - {request.method} {request.url.path} - {response.status_code} - {duration:.2f}ms")
-
-    return response
 
 # 날짜/시간 변환 함수
 def json_datetime_serializer(obj):
