@@ -28,7 +28,7 @@ services:
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_extensions:/opt/sonarqube/extensions
     networks:
-    - loadtest-net
+      - loadtest-net
 
   prometheus:
     image: prom/prometheus:latest
